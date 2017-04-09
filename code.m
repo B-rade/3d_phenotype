@@ -1,8 +1,21 @@
 % declare variables
+clear all;
+
 all_points = [];
 gen_images = 1;
 % read in background image
 background = imread('images/test_background.png');
+
+voxels = ones(180,180,180);
+
+for ii = 1:size(voxels,1)
+    for jj = 1:size(voxels,2)
+        for kk = 1:size(voxels,3)
+            voxels(ii,jj,kk) = ii + jj + kk;
+        end
+    end
+end
+
 
 % read in images
 for theta = 0:36:144
@@ -19,10 +32,12 @@ for theta = 0:36:144
     
     % dilate to compensate for thin leaves
     se = strel('disk',7);
-    I_dilate = imdilate(I_bw,se);
+    % I_dilate = imdilate(I_bw,se);
+    se = strel('disk',5);
+    % I_erode = imerode(I_dilate,se);
     
     % compute region props
-    stats = regionprops(I_dilate,'ConvexArea','ConvexHull');
+    stats = regionprops(I_bw,'ConvexArea','ConvexHull','Image','BoundingBox');
     
     % find largest convex area region (this is the plant)
     % b/c some images have artifacts at the edges
