@@ -1,0 +1,3 @@
+
+plotting an image on a 3d plot
+http://stackoverflow.com/questions/3719502/how-can-i-plot-an-image-jpg-in-matlab-in-both-2-d-and-3-d

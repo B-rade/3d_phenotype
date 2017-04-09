@@ -1,9 +1,21 @@
 % declare variables
-all_points = [];
-gen_images = 0;
+clear all;
 
+all_points = [];
+gen_images = 1;
 % read in background image
 background = imread('images/test_background.png');
+
+voxels = ones(180,180,180);
+
+for ii = 1:size(voxels,1)
+    for jj = 1:size(voxels,2)
+        for kk = 1:size(voxels,3)
+            voxels(ii,jj,kk) = ii + jj + kk;
+        end
+    end
+end
+
 
 % read in images
 for theta = 0:36:144
@@ -20,10 +32,12 @@ for theta = 0:36:144
     
     % dilate to compensate for thin leaves
     se = strel('disk',7);
-    I_dilate = imdilate(I_bw,se);
+    % I_dilate = imdilate(I_bw,se);
+    se = strel('disk',5);
+    % I_erode = imerode(I_dilate,se);
     
     % compute region props
-    stats = regionprops(I_dilate,'ConvexArea','ConvexHull');
+    stats = regionprops(I_bw,'ConvexArea','ConvexHull','Image','BoundingBox');
     
     % find largest convex area region (this is the plant)
     % b/c some images have artifacts at the edges
@@ -58,7 +72,7 @@ for theta = 0:36:144
     all_points = [all_points; x -z y];
     
     % show images for debugging purposes
-    if gen_images
+    if gen_images && theta == 1440
         figure, imshow(I_subtract,'initialMagnification',30);
         figure, imshow(I_bw,'initialMagnification',30);
         figure, imshow(I_dilate,'initialMagnification',30);
@@ -74,9 +88,6 @@ for theta = 0:36:144
         scatter3(all_points(:,1),all_points(:,2),all_points(:,3));
     end
     
-    
-
-    
 end
 
 % compute the 3d convex-hull by makes a delaunay Triangulation
@@ -89,5 +100,30 @@ scatter3(all_points(:,1),all_points(:,2),all_points(:,3));
 hold on
 trisurf(K,DT.Points(:,1),DT.Points(:,2),DT.Points(:,3),'FaceColor','cyan');
 alpha 0.2
-axis square
 hold off
+
+I = imread('images\test_top.png');
+I = flip(I,1);
+
+scale = 317/332;
+
+x = round([-1300 2454-1300; -1300 2454-1300] .* 300/332);
+y = round([-1028 -1028; 2056-1028 2056-1028] .* 300/332);
+z = [-1600 -1600; -1600 -1600];
+
+theta = 90;
+theta_rad = deg2rad(theta);
+rot = [cos(theta_rad), sin(theta_rad); -sin(theta_rad), cos(theta_rad)];
+
+x = reshape(x',4,1);
+y = reshape(y',4,1);
+
+xy = [x y] * rot;
+
+x = vec2mat(xy(:,1),2);
+y = vec2mat(xy(:,2),2);
+
+surface('XData',x,'YData',y,...
+        'ZData',z,'CData',flip(I,1),...
+        'FaceColor','texturemap','EdgeColor','none');
+axis square
