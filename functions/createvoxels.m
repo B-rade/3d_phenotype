@@ -1,9 +1,8 @@
-% TODO use the sizes to generate dynamically
 function voxels = createvoxels(xsize, ysize, zsize)
     
-    x = -90:1:90;
-    y = -90:1:90;
-    z = -90:1:90;
+    x = -xsize/2:1:xsize/2;
+    y = -ysize/2:1:ysize/2;
+    z = -zsize/2:1:zsize/2;
 
     [X,Y,Z] = meshgrid( x, y, z );
     voxels.X = X(:);
